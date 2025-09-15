@@ -17,24 +17,34 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Siksha Sopan Theme Colors */
+    --primary: 207 77% 38%; /* Warm Blue #1E6FB2 */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 22 100% 59%; /* Bright Orange #FF8A33 */
+    --secondary-foreground: 0 0% 100%;
 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 207 77% 38%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 207 77% 38%;
+
+    /* Custom gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(207 77% 38%), hsl(207 77% 48%));
+    --gradient-secondary: linear-gradient(135deg, hsl(22 100% 59%), hsl(22 100% 69%));
+    --gradient-warm: linear-gradient(135deg, hsl(207 77% 38%), hsl(22 100% 59%));
+
+    /* Shadows */
+    --shadow-soft: 0 4px 16px -2px hsl(207 77% 38% / 0.1);
+    --shadow-glow: 0 0 40px hsl(207 77% 38% / 0.15);
 
     --radius: 0.5rem;
 
