@@ -47,8 +47,22 @@ export type Database = {
             foreignKeyName: "announcements_author_id_fkey"
             columns: ["author_id"]
             isOneToOne: false
+            referencedRelation: "pending_volunteers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "announcements_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "announcements_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "volunteer_dashboard"
+            referencedColumns: ["volunteer_id"]
           },
           {
             foreignKeyName: "announcements_class_id_fkey"
@@ -56,6 +70,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "classes"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "announcements_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "volunteer_dashboard"
+            referencedColumns: ["class_id"]
           },
         ]
       }
@@ -84,11 +105,32 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "class_assignments_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "volunteer_dashboard"
+            referencedColumns: ["class_id"]
+          },
+          {
+            foreignKeyName: "class_assignments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "pending_volunteers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "class_assignments_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_assignments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "volunteer_dashboard"
+            referencedColumns: ["volunteer_id"]
           },
         ]
       }
@@ -174,11 +216,32 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "syllabus_entries_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "volunteer_dashboard"
+            referencedColumns: ["class_id"]
+          },
+          {
+            foreignKeyName: "syllabus_entries_volunteer_id_fkey"
+            columns: ["volunteer_id"]
+            isOneToOne: false
+            referencedRelation: "pending_volunteers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "syllabus_entries_volunteer_id_fkey"
             columns: ["volunteer_id"]
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "syllabus_entries_volunteer_id_fkey"
+            columns: ["volunteer_id"]
+            isOneToOne: false
+            referencedRelation: "volunteer_dashboard"
+            referencedColumns: ["volunteer_id"]
           },
         ]
       }
@@ -214,12 +277,64 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      pending_volunteers: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          id: string | null
+          name: string | null
+          programme: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          name?: string | null
+          programme?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          name?: string | null
+          programme?: string | null
+        }
+        Relationships: []
+      }
+      volunteer_dashboard: {
+        Row: {
+          attachments: string[] | null
+          class_id: string | null
+          class_label: string | null
+          date_taught: string | null
+          description: string | null
+          duration_min: number | null
+          entry_created_at: string | null
+          entry_updated_at: string | null
+          grade: string | null
+          notes: string | null
+          photo_url: string | null
+          programme: string | null
+          subject: string | null
+          syllabus_entry_id: string | null
+          test_given: boolean | null
+          test_info: Json | null
+          topics: string[] | null
+          volunteer_email: string | null
+          volunteer_id: string | null
+          volunteer_name: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      promote_user: {
+        Args: { new_role: string; target_user: string }
+        Returns: undefined
       }
     }
     Enums: {
