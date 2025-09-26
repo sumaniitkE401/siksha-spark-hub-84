@@ -58,25 +58,11 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "announcements_author_id_fkey"
-            columns: ["author_id"]
-            isOneToOne: false
-            referencedRelation: "volunteer_dashboard"
-            referencedColumns: ["volunteer_id"]
-          },
-          {
             foreignKeyName: "announcements_class_id_fkey"
             columns: ["class_id"]
             isOneToOne: false
             referencedRelation: "classes"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "announcements_class_id_fkey"
-            columns: ["class_id"]
-            isOneToOne: false
-            referencedRelation: "volunteer_dashboard"
-            referencedColumns: ["class_id"]
           },
         ]
       }
@@ -105,13 +91,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "class_assignments_class_id_fkey"
-            columns: ["class_id"]
-            isOneToOne: false
-            referencedRelation: "volunteer_dashboard"
-            referencedColumns: ["class_id"]
-          },
-          {
             foreignKeyName: "class_assignments_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -124,13 +103,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "class_assignments_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "volunteer_dashboard"
-            referencedColumns: ["volunteer_id"]
           },
         ]
       }
@@ -216,13 +188,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "syllabus_entries_class_id_fkey"
-            columns: ["class_id"]
-            isOneToOne: false
-            referencedRelation: "volunteer_dashboard"
-            referencedColumns: ["class_id"]
-          },
-          {
             foreignKeyName: "syllabus_entries_volunteer_id_fkey"
             columns: ["volunteer_id"]
             isOneToOne: false
@@ -235,13 +200,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "syllabus_entries_volunteer_id_fkey"
-            columns: ["volunteer_id"]
-            isOneToOne: false
-            referencedRelation: "volunteer_dashboard"
-            referencedColumns: ["volunteer_id"]
           },
         ]
       }
@@ -324,7 +282,29 @@ export type Database = {
           volunteer_id: string | null
           volunteer_name: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "syllabus_entries_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "syllabus_entries_volunteer_id_fkey"
+            columns: ["volunteer_id"]
+            isOneToOne: false
+            referencedRelation: "pending_volunteers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "syllabus_entries_volunteer_id_fkey"
+            columns: ["volunteer_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
