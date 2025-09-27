@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Navigate } from "react-router-dom";
-import { Search, Users, Settings, BarChart } from "lucide-react";
+import { Search, Users, Settings, BarChart, BookOpen, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
 interface UserWithClasses {
@@ -36,6 +37,11 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<string>("");
   const [updating, setUpdating] = useState<string>("");
+
+  // Manage Classes state
+  const [volunteers, setVolunteers] = useState<UserWithClasses[]>([]);
+  const [classAssignments, setClassAssignments] = useState<Record<string, { grade: string; subject: string }>>({});
+  const [assigning, setAssigning] = useState<string>("");
 
   // Check if current user is admin
   useEffect(() => {
@@ -129,6 +135,155 @@ export default function AdminDashboard() {
     );
     setFilteredUsers(filtered);
   }, [searchQuery, users]);
+
+  // Fetch volunteers for class assignment
+  useEffect(() => {
+    async function fetchVolunteers() {
+      if (userRole !== 'admin') return;
+      
+      try {
+        const { data: volunteersData, error } = await supabase
+          .from('users')
+          .select(`
+            *,
+            class_assignments (
+              class_id,
+              classes (
+                id,
+                subject,
+                grade,
+                class_label
+              )
+            )
+          `)
+          .in('role', ['admin', 'volunteer'])
+          .order('name');
+
+        if (error) throw error;
+
+        const volunteersWithClasses: UserWithClasses[] = volunteersData.map(user => ({
+          ...user,
+          role: user.role as 'admin' | 'volunteer' | 'viewer',
+          assignedClasses: user.class_assignments?.map((assignment: any) => ({
+            class_id: assignment.class_id,
+            subject: assignment.classes.subject,
+            grade: assignment.classes.grade,
+            class_label: assignment.classes.class_label
+          })) || []
+        }));
+
+        setVolunteers(volunteersWithClasses);
+      } catch (error) {
+        console.error('Error fetching volunteers:', error);
+      }
+    }
+
+    fetchVolunteers();
+  }, [userRole]);
+
+  // Get subject options based on grade
+  const getSubjectOptions = (grade: string) => {
+    const gradeNum = parseInt(grade.replace(/\D/g, ''));
+    if (gradeNum >= 6 && gradeNum <= 9) {
+      return ['Mathematics', 'Science', 'English', 'Social Science', 'Hindi', 'Extra Curricular'];
+    } else if (gradeNum >= 10 && gradeNum <= 12) {
+      return ['Physics', 'Chemistry', 'Biology', 'English', 'Maths', 'Extra Curricular'];
+    }
+    return [];
+  };
+
+  // Handle class assignment
+  const handleClassAssignment = async (userId: string) => {
+    const assignment = classAssignments[userId];
+    if (!assignment || !assignment.grade || !assignment.subject) {
+      toast({
+        title: "Error",
+        description: "Please select both grade and subject",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setAssigning(userId);
+    try {
+      // First, check if class exists or create it
+      const classLabel = `${assignment.grade}-${assignment.subject}`;
+      let classId;
+
+      const { data: existingClass, error: findError } = await supabase
+        .from('classes')
+        .select('id')
+        .eq('grade', assignment.grade)
+        .eq('subject', assignment.subject)
+        .maybeSingle();
+
+      if (findError) throw findError;
+
+      if (existingClass) {
+        classId = existingClass.id;
+      } else {
+        // Create new class
+        const { data: newClass, error: createError } = await supabase
+          .from('classes')
+          .insert({
+            grade: assignment.grade,
+            subject: assignment.subject,
+            class_label: classLabel
+          })
+          .select('id')
+          .single();
+
+        if (createError) throw createError;
+        classId = newClass.id;
+      }
+
+      // Create assignment (with conflict handling)
+      const { error: assignError } = await supabase
+        .from('class_assignments')
+        .upsert({
+          user_id: userId,
+          class_id: classId
+        }, {
+          onConflict: 'user_id,class_id'
+        });
+
+      if (assignError) throw assignError;
+
+      // Update local state
+      setVolunteers(prev => prev.map(vol => {
+        if (vol.id === userId) {
+          const newClass = {
+            class_id: classId,
+            subject: assignment.subject,
+            grade: assignment.grade,
+            class_label: classLabel
+          };
+          return {
+            ...vol,
+            assignedClasses: [...vol.assignedClasses.filter(c => c.class_id !== classId), newClass]
+          };
+        }
+        return vol;
+      }));
+
+      // Clear assignment form
+      setClassAssignments(prev => ({ ...prev, [userId]: { grade: '', subject: '' } }));
+
+      toast({
+        title: "Success",
+        description: `Assigned ${assignment.grade} ${assignment.subject} successfully`,
+      });
+    } catch (error) {
+      console.error('Error assigning class:', error);
+      toast({
+        title: "Error",
+        description: "Failed to assign class",
+        variant: "destructive",
+      });
+    } finally {
+      setAssigning("");
+    }
+  };
 
   // Update user role
   const handleRoleUpdate = async (userId: string, newRole: string) => {
@@ -364,6 +519,145 @@ export default function AdminDashboard() {
             {filteredUsers.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
                 {searchQuery ? 'No users found matching your search.' : 'No users found.'}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Manage Classes Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BookOpen className="w-5 h-5" />
+            Manage Classes
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50">
+                  <TableHead>User</TableHead>
+                  <TableHead>Current Classes</TableHead>
+                  <TableHead>Assign Grade</TableHead>
+                  <TableHead>Assign Subject</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {volunteers.map((volunteer, index) => {
+                  const assignment = classAssignments[volunteer.id] || { grade: '', subject: '' };
+                  const subjectOptions = getSubjectOptions(assignment.grade);
+                  
+                  return (
+                    <TableRow 
+                      key={volunteer.id}
+                      className={index % 2 === 0 ? "bg-background" : "bg-muted/20 hover:bg-muted/30"}
+                    >
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-10 w-10 ring-2 ring-primary/20">
+                            <AvatarImage src={volunteer.photo_url} alt={volunteer.name} />
+                            <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                              {volunteer.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{volunteer.name || 'Unknown'}</p>
+                            <p className="text-xs text-muted-foreground">{volunteer.email}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          {volunteer.assignedClasses.length > 0 ? (
+                            volunteer.assignedClasses.map((cls) => (
+                              <Badge 
+                                key={cls.class_id} 
+                                variant="outline" 
+                                className="text-xs bg-accent/10 text-accent"
+                              >
+                                {cls.grade} {cls.subject}
+                              </Badge>
+                            ))
+                          ) : (
+                            <span className="text-muted-foreground text-sm">No classes assigned</span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Select
+                          value={assignment.grade}
+                          onValueChange={(value) => 
+                            setClassAssignments(prev => ({
+                              ...prev,
+                              [volunteer.id]: { ...assignment, grade: value, subject: '' }
+                            }))
+                          }
+                        >
+                          <SelectTrigger className="w-28 bg-background border-primary/20">
+                            <SelectValue placeholder="Grade" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-background border border-primary/20">
+                            <SelectItem value="6th">6th</SelectItem>
+                            <SelectItem value="7th">7th</SelectItem>
+                            <SelectItem value="8th">8th</SelectItem>
+                            <SelectItem value="9th">9th</SelectItem>
+                            <SelectItem value="10th">10th</SelectItem>
+                            <SelectItem value="11th">11th</SelectItem>
+                            <SelectItem value="12th">12th</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell>
+                        <Select
+                          value={assignment.subject}
+                          onValueChange={(value) => 
+                            setClassAssignments(prev => ({
+                              ...prev,
+                              [volunteer.id]: { ...assignment, subject: value }
+                            }))
+                          }
+                          disabled={!assignment.grade}
+                        >
+                          <SelectTrigger className="w-36 bg-background border-primary/20">
+                            <SelectValue placeholder="Subject" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-background border border-primary/20">
+                            {subjectOptions.map((subject) => (
+                              <SelectItem key={subject} value={subject}>
+                                {subject}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          onClick={() => handleClassAssignment(volunteer.id)}
+                          disabled={!assignment.grade || !assignment.subject || assigning === volunteer.id}
+                          size="sm"
+                          className="bg-primary hover:bg-primary/90"
+                        >
+                          {assigning === volunteer.id ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          ) : (
+                            <>
+                              <Plus className="w-4 h-4 mr-1" />
+                              Assign
+                            </>
+                          )}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+            {volunteers.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                No volunteers found.
               </div>
             )}
           </div>
