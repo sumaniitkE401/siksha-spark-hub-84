@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
+import AdminDashboard from "./pages/AdminDashboard";
 import DashboardLayout from "./components/DashboardLayout";
 import NotFound from "./pages/NotFound";
 
@@ -52,7 +53,7 @@ const App = () => (
               <Route path="analytics" element={<div>Analytics (Coming Soon)</div>} />
               <Route path="announcements" element={<div>Announcements (Coming Soon)</div>} />
               {/* Admin routes */}
-              <Route path="admin/volunteers" element={<div>Manage Volunteers (Coming Soon)</div>} />
+              <Route path="admin/volunteers" element={<AdminDashboard />} />
               <Route path="admin/classes" element={<div>Manage Classes (Coming Soon)</div>} />
               <Route path="admin/syllabus" element={<div>Approve Syllabus (Coming Soon)</div>} />
               <Route path="admin/announcements" element={<div>Post Announcements (Coming Soon)</div>} />
