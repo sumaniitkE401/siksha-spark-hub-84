@@ -187,7 +187,7 @@ export default function AdminDashboard() {
     if (gradeNum >= 6 && gradeNum <= 9) {
       return ['Mathematics', 'Science', 'English', 'Social Science', 'Hindi', 'Extra Curricular'];
     } else if (gradeNum >= 10 && gradeNum <= 12) {
-      return ['Physics', 'Chemistry', 'Biology', 'English', 'Maths', 'Extra Curricular'];
+      return ['Physics', 'Chemistry', 'Biology', 'English', 'Maths', 'Social Science', 'Extra Curricular'];
     }
     return [];
   };
