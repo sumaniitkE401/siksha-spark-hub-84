@@ -58,6 +58,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "announcements_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "volunteer_list"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "announcements_class_id_fkey"
             columns: ["class_id"]
             isOneToOne: false
@@ -104,7 +111,32 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "class_assignments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "volunteer_list"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      class_subjects: {
+        Row: {
+          grade: string
+          id: string
+          subject: string
+        }
+        Insert: {
+          grade: string
+          id?: string
+          subject: string
+        }
+        Update: {
+          grade?: string
+          id?: string
+          subject?: string
+        }
+        Relationships: []
       }
       classes: {
         Row: {
@@ -130,6 +162,80 @@ export type Database = {
           grade?: string
           id?: string
           subject?: string
+        }
+        Relationships: []
+      }
+      resources: {
+        Row: {
+          class_id: string | null
+          file_url: string
+          id: string
+          topic: string | null
+          uploaded_at: string | null
+          volunteer_id: string | null
+        }
+        Insert: {
+          class_id?: string | null
+          file_url: string
+          id?: string
+          topic?: string | null
+          uploaded_at?: string | null
+          volunteer_id?: string | null
+        }
+        Update: {
+          class_id?: string | null
+          file_url?: string
+          id?: string
+          topic?: string | null
+          uploaded_at?: string | null
+          volunteer_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resources_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resources_volunteer_id_fkey"
+            columns: ["volunteer_id"]
+            isOneToOne: false
+            referencedRelation: "pending_volunteers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resources_volunteer_id_fkey"
+            columns: ["volunteer_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resources_volunteer_id_fkey"
+            columns: ["volunteer_id"]
+            isOneToOne: false
+            referencedRelation: "volunteer_list"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subjects: {
+        Row: {
+          class_range: string
+          id: string
+          name: string
+        }
+        Insert: {
+          class_range: string
+          id?: string
+          name: string
+        }
+        Update: {
+          class_range?: string
+          id?: string
+          name?: string
         }
         Relationships: []
       }
@@ -201,6 +307,13 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "syllabus_entries_volunteer_id_fkey"
+            columns: ["volunteer_id"]
+            isOneToOne: false
+            referencedRelation: "volunteer_list"
+            referencedColumns: ["id"]
+          },
         ]
       }
       users: {
@@ -232,6 +345,75 @@ export type Database = {
           role?: string
         }
         Relationships: []
+      }
+      weekly_schedule: {
+        Row: {
+          class_id: string | null
+          created_at: string | null
+          day_of_week: string
+          end_time: string
+          id: string
+          start_time: string
+          subject_id: string | null
+          volunteer_id: string | null
+        }
+        Insert: {
+          class_id?: string | null
+          created_at?: string | null
+          day_of_week: string
+          end_time: string
+          id?: string
+          start_time: string
+          subject_id?: string | null
+          volunteer_id?: string | null
+        }
+        Update: {
+          class_id?: string | null
+          created_at?: string | null
+          day_of_week?: string
+          end_time?: string
+          id?: string
+          start_time?: string
+          subject_id?: string | null
+          volunteer_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_schedule_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "weekly_schedule_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "weekly_schedule_volunteer_id_fkey"
+            columns: ["volunteer_id"]
+            isOneToOne: false
+            referencedRelation: "pending_volunteers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "weekly_schedule_volunteer_id_fkey"
+            columns: ["volunteer_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "weekly_schedule_volunteer_id_fkey"
+            columns: ["volunteer_id"]
+            isOneToOne: false
+            referencedRelation: "volunteer_list"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -304,7 +486,41 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "syllabus_entries_volunteer_id_fkey"
+            columns: ["volunteer_id"]
+            isOneToOne: false
+            referencedRelation: "volunteer_list"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      volunteer_list: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          id: string | null
+          name: string | null
+          photo_url: string | null
+          programme: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          name?: string | null
+          photo_url?: string | null
+          programme?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          id?: string | null
+          name?: string | null
+          photo_url?: string | null
+          programme?: string | null
+        }
+        Relationships: []
       }
     }
     Functions: {
