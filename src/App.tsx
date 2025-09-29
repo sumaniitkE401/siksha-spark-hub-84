@@ -7,6 +7,8 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
+import MyClasses from "./pages/MyClasses";
+import MySyllabus from "./pages/MySyllabus";
 import ManageVolunteers from "./pages/ManageVolunteers";
 import ManageClasses from "./pages/ManageClasses";
 import DashboardLayout from "./components/DashboardLayout";
@@ -49,9 +51,9 @@ const App = () => (
               <Route index element={<Dashboard />} />
               <Route path="profile" element={<Profile />} />
               {/* Volunteer routes */}
-              <Route path="classes" element={<div>My Classes (Coming Soon)</div>} />
-              <Route path="syllabus" element={<div>My Syllabus (Coming Soon)</div>} />
-              <Route path="analytics" element={<div>Analytics (Coming Soon)</div>} />
+              <Route path="classes" element={<MyClasses />} />
+              <Route path="syllabus" element={<MySyllabus />} />
+              <Route path="resources" element={<div>Upload Resources (Coming Soon)</div>} />
               <Route path="announcements" element={<div>Announcements (Coming Soon)</div>} />
               {/* Admin routes */}
               <Route path="admin/volunteers" element={<ManageVolunteers />} />

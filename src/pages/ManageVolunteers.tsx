@@ -92,13 +92,16 @@ export default function ManageVolunteers() {
           ...user,
           role: user.role as 'admin' | 'volunteer' | 'viewer',
           assignedClasses: assignmentsData
-            .filter(assignment => assignment.user_id === user.id)
-            .map(assignment => ({
-              class_id: assignment.class_id,
-              subject: assignment.classes.subject,
-              grade: assignment.classes.grade,
-              class_label: assignment.classes.class_label
-            }))
+            .filter(assignment => assignment.user_id === user.id && assignment.classes)
+            .map(assignment => {
+              const classData = Array.isArray(assignment.classes) ? assignment.classes[0] : assignment.classes;
+              return {
+                class_id: assignment.class_id,
+                subject: classData?.subject || '',
+                grade: classData?.grade || '',
+                class_label: classData?.class_label || ''
+              };
+            })
         }));
 
         setUsers(usersWithClasses);
